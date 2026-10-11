@@ -24,7 +24,7 @@
   .lamp{
     position:relative;width:240px;
     filter:drop-shadow(0 0 60px color-mix(in srgb, var(--glow) 45%, transparent));
-    transition:filter .5s;
+    transition:filter .5s,opacity .45s;
   }
   .cap{
     width:92px;height:120px;margin:0 auto;
@@ -35,27 +35,6 @@
     position:relative;width:240px;height:360px;margin:-2px auto 0;
     clip-path:polygon(34% 0,66% 0,100% 100%,0 100%);
     overflow:hidden;
-  }
-  .goo{
-    position:absolute;inset:0;
-    background:var(--liquid);
-    filter:blur(14px) contrast(26);
-    transition:background .6s;
-  }
-  .blob{
-    position:absolute;border-radius:50%;
-    background:var(--lava);
-    animation-name:rise;
-    animation-timing-function:ease-in-out;
-    animation-iteration-count:infinite;
-    animation-direction:alternate;
-    transition:background .6s;
-  }
-  @keyframes rise{
-    0%   {transform:translate(0,0) scale(1)}
-    35%  {transform:translate(var(--dx),-120px) scale(1.25)}
-    65%  {transform:translate(calc(var(--dx) * -1),-250px) scale(.85)}
-    100% {transform:translate(0,var(--top)) scale(1.15)}
   }
   .glass::after{
     content:"";position:absolute;inset:0;pointer-events:none;
@@ -80,7 +59,49 @@
     background:linear-gradient(90deg,#63676b,#dfe3e7 26%,#fafbfc 45%,#b9bec3 64%,#73777b);
   }
 
+  /* ---------- рідина (спільна для обох режимів) ---------- */
+  .goo{
+    position:absolute;inset:0;
+    background:var(--liquid);
+    filter:blur(14px) contrast(26);
+    transition:background .6s;
+  }
+  .blob{
+    position:absolute;border-radius:50%;
+    background:var(--lava);
+    animation-name:rise;
+    animation-timing-function:ease-in-out;
+    animation-iteration-count:infinite;
+    animation-direction:alternate;
+    transition:background .6s;
+  }
+  @keyframes rise{
+    0%   {transform:translate(0,0) scale(1)}
+    35%  {transform:translate(var(--dx),calc(var(--top) * .33)) scale(1.25)}
+    65%  {transform:translate(calc(var(--dx) * -1),calc(var(--top) * .7)) scale(.85)}
+    100% {transform:translate(0,var(--top)) scale(1.15)}
+  }
+
+  /* ---------- повноекранний режим ---------- */
+  .stage{
+    position:fixed;inset:0;z-index:0;
+    opacity:0;pointer-events:none;
+    transition:opacity .5s;
+  }
+  .stage .goo{filter:blur(34px) contrast(32)}
+  body.full .stage{opacity:1}
+  body.full .lamp{opacity:0;pointer-events:none;position:absolute}
+  body.full .hint{opacity:.35}
+
   /* ---------- панель ---------- */
+  .ui{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:22px;
+      transition:opacity .4s}
+  body.full .ui{
+    position:fixed;left:0;right:0;bottom:26px;gap:14px;
+    padding:18px 10px 6px;
+  }
+  body.full.hidden-ui .ui{opacity:0;pointer-events:none}
+
   .row{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center}
   .dot{
     width:38px;height:38px;border-radius:50%;padding:0;cursor:pointer;
@@ -90,34 +111,39 @@
   .dot:hover{transform:scale(1.12)}
   .dot.active{border-color:#fff;transform:scale(1.2);box-shadow:0 0 18px rgba(255,255,255,.45)}
 
-  .sound{
+  .pill{
     display:flex;align-items:center;gap:10px;
     padding:9px 16px;border-radius:22px;cursor:pointer;
     border:1px solid rgba(255,255,255,.16);
-    background:rgba(255,255,255,.05);
+    background:rgba(20,20,24,.45);
+    -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
     color:#c8ccd2;font-size:13px;letter-spacing:.3px;
     transition:background .2s,color .2s,border-color .2s;
   }
-  .sound:hover{background:rgba(255,255,255,.1);color:#fff}
-  .sound.on{border-color:color-mix(in srgb, var(--glow) 70%, transparent);color:#fff}
+  .pill:hover{background:rgba(255,255,255,.12);color:#fff}
+  .pill.on{border-color:color-mix(in srgb, var(--glow) 70%, transparent);color:#fff}
+
   .bars{display:flex;gap:3px;align-items:flex-end;height:14px}
   .bars i{width:3px;height:4px;border-radius:2px;background:currentColor;opacity:.5}
-  .sound.on .bars i{opacity:1;animation:eq .9s ease-in-out infinite}
-  .sound.on .bars i:nth-child(2){animation-delay:.2s}
-  .sound.on .bars i:nth-child(3){animation-delay:.45s}
-  .sound.on .bars i:nth-child(4){animation-delay:.65s}
+  .pill.on .bars i{opacity:1;animation:eq .9s ease-in-out infinite}
+  .pill.on .bars i:nth-child(2){animation-delay:.2s}
+  .pill.on .bars i:nth-child(3){animation-delay:.45s}
+  .pill.on .bars i:nth-child(4){animation-delay:.65s}
   @keyframes eq{0%,100%{height:4px}50%{height:14px}}
 
   input[type=range]{width:110px;accent-color:#9aa0a8}
-  .hint{color:#6f737a;font-size:13px;letter-spacing:.3px;text-align:center}
+  .hint{color:#6f737a;font-size:13px;letter-spacing:.3px;text-align:center;transition:opacity .4s}
   .hint b{color:#aeb3ba;font-weight:600}
 </style>
 </head>
 <body>
 
+  <!-- повноекранна рідина -->
+  <div class="stage" id="stage"><div class="goo" id="gooFull"></div></div>
+
   <div class="lamp" id="lamp">
     <div class="cap"></div>
-    <div class="glass" id="glass"><div class="goo" id="goo"></div></div>
+    <div class="glass" id="glass"><div class="goo" id="gooLamp"></div></div>
     <div class="base">
       <div class="top"></div>
       <div class="ring"></div>
@@ -125,28 +151,28 @@
     </div>
   </div>
 
-  <div class="row" id="panel"></div>
-
-  <div class="row">
-    <button class="sound" id="sound">
-      <span class="bars"><i></i><i></i><i></i><i></i></span>
-      <span id="soundLabel">Увімкнути музику</span>
-    </button>
-    <input type="range" id="vol" min="0" max="100" value="55" title="Гучність">
+  <div class="ui" id="ui">
+    <div class="row" id="panel"></div>
+    <div class="row">
+      <button class="pill" id="sound">
+        <span class="bars"><i></i><i></i><i></i><i></i></span>
+        <span id="soundLabel">Увімкнути музику</span>
+      </button>
+      <input type="range" id="vol" min="0" max="100" value="55" title="Гучність">
+      <button class="pill" id="fsBtn">⛶ <span id="fsLabel">На всю сторінку</span></button>
+    </div>
+    <p class="hint"><b>← →</b> режим &nbsp;·&nbsp; <b>↑ ↓</b> швидкість &nbsp;·&nbsp; <b>M</b> звук &nbsp;·&nbsp; <b>F</b> повний екран &nbsp;·&nbsp; <b>H</b> сховати панель</p>
   </div>
 
-  <p class="hint"><b>← →</b> режим &nbsp;·&nbsp; <b>↑ ↓</b> швидкість &nbsp;·&nbsp; <b>M</b> звук</p>
-
 <script>
-/* ============ ПРЕСЕТИ ============
-   кожен режим = колір + свій музичний лад і темп        */
+/* ============ ПРЕСЕТИ: колір + лад + темп ============ */
 const MODES = [
   {name:'Classic Blue', liquid:'#1ea2f0', lava:'#eaf7ff', count:6, size:[60,110], speed:1.0,
-   root:55, scale:[0,2,3,5,7,10], pace:5.5},                       // G мінор пентатоніка+
+   root:55, scale:[0,2,3,5,7,10], pace:5.5},
   {name:'Lava Red',     liquid:'#c0180f', lava:'#ffb02e', count:7, size:[50,100], speed:1.2,
-   root:50, scale:[0,1,5,7,8],    pace:4.0},                       // фрігійський, напружений
+   root:50, scale:[0,1,5,7,8],    pace:4.0},
   {name:'Purple Haze',  liquid:'#5b1fa8', lava:'#ff6ad5', count:6, size:[60,120], speed:0.8,
-   root:53, scale:[0,2,4,7,9,11], pace:6.5},                       // лідійський
+   root:53, scale:[0,2,4,7,9,11], pace:6.5},
   {name:'Toxic',        liquid:'#0f3d16', lava:'#8dff3a', count:8, size:[40,85],  speed:1.5,
    root:57, scale:[0,2,3,6,7,10], pace:3.2},
   {name:'Aqua',         liquid:'#06707a', lava:'#b6fff4', count:5, size:[70,130], speed:0.7,
@@ -164,14 +190,16 @@ const MODES = [
 ];
 
 const GLASS_H = 360;
-const goo = document.getElementById('goo');
-const lamp = document.getElementById('lamp');
+const gooLamp = document.getElementById('gooLamp');
+const gooFull = document.getElementById('gooFull');
+const lamp  = document.getElementById('lamp');
 const glass = document.getElementById('glass');
+const stage = document.getElementById('stage');
 const panel = document.getElementById('panel');
-const root = document.documentElement;
+const root  = document.documentElement;
 
-let current = 0, speed = 1;
-const rnd = (a,b) => a + Math.random()*(b-a);
+let current = 0, speed = 1, full = false;
+const rnd  = (a,b) => a + Math.random()*(b-a);
 const pick = a => a[Math.floor(Math.random()*a.length)];
 const midi = n => 440 * Math.pow(2, (n-69)/12);
 
@@ -185,47 +213,79 @@ MODES.forEach((m,i)=>{
   panel.appendChild(b);
 });
 
-/* ---------- візуал ---------- */
+/* ---------- генерація крапель ---------- */
+function buildBlobs(box, h, m, k){
+  box.innerHTML = '';
+  const n = Math.round(m.count * k);
+  for(let i=0;i<n;i++){
+    const d = document.createElement('div');
+    d.className = 'blob';
+    const s = rnd(m.size[0], m.size[1]) * k;
+    d.style.width  = s + 'px';
+    d.style.height = s * rnd(.85,1.05) + 'px';
+    d.style.left   = rnd(-5,95) + '%';
+    d.style.bottom = rnd(-s*0.5, s*0.2) + 'px';
+    d.style.setProperty('--dx',  rnd(-28,28)*k + 'px');
+    d.style.setProperty('--top', -(h - s*0.6) + 'px');
+    d.style.animationDuration = (rnd(9,20) * Math.sqrt(k) / (m.speed*speed)) + 's';
+    d.style.animationDelay    = -rnd(0,16) + 's';
+    box.appendChild(d);
+  }
+}
+
+function render(){
+  const m = MODES[current];
+  if(full) buildBlobs(gooFull, window.innerHeight, m, 2.4);
+  else     buildBlobs(gooLamp, GLASS_H, m, 1);
+}
+
 function setMode(i){
   current = (i + MODES.length) % MODES.length;
   const m = MODES[current];
-
   root.style.setProperty('--liquid', m.liquid);
   root.style.setProperty('--lava',   m.lava);
   root.style.setProperty('--glow',   m.liquid);
   lamp.style.filter = m.rainbow ? 'drop-shadow(0 0 60px rgba(255,255,255,.35))' : '';
-
-  goo.innerHTML = '';
-  for(let k=0;k<m.count;k++){
-    const d = document.createElement('div');
-    d.className = 'blob';
-    const s = rnd(m.size[0], m.size[1]);
-    d.style.width  = s + 'px';
-    d.style.height = s * rnd(.85,1.05) + 'px';
-    d.style.left   = rnd(-5,95) + '%';
-    d.style.bottom = rnd(-40,20) + 'px';
-    d.style.setProperty('--dx',  rnd(-28,28) + 'px');
-    d.style.setProperty('--top', -(GLASS_H - s*0.6) + 'px');
-    d.style.animationDuration = (rnd(9,20) / (m.speed*speed)) + 's';
-    d.style.animationDelay    = -rnd(0,16) + 's';
-    goo.appendChild(d);
-  }
+  render();
   document.querySelectorAll('.dot').forEach((b,n)=>b.classList.toggle('active', n===current));
   rainbowLoop(m.rainbow);
 }
 
+/* ---------- Rainbow ---------- */
 let rafId = null, hue = 0;
 function rainbowLoop(on){
   cancelAnimationFrame(rafId);
-  glass.style.filter = '';
+  glass.style.filter = ''; stage.style.filter = '';
   if(!on) return;
-  const tick = ()=>{ hue=(hue+0.4)%360; glass.style.filter=`hue-rotate(${hue}deg)`; rafId=requestAnimationFrame(tick); };
+  const tick = ()=>{
+    hue = (hue + 0.4) % 360;
+    const f = `hue-rotate(${hue}deg)`;
+    glass.style.filter = f; stage.style.filter = f;
+    rafId = requestAnimationFrame(tick);
+  };
   tick();
 }
 
-/* ============ ЗВУК ============
-   генеративний ембієнт на Web Audio: пад + рідкі ноти + реверб */
-let ctx, master, wet, playing = false, padTimer = null, noteTimer = null, voices = [];
+/* ---------- повноекранний режим ---------- */
+function setFull(on){
+  full = on;
+  document.body.classList.toggle('full', full);
+  document.body.classList.remove('hidden-ui');
+  document.getElementById('fsLabel').textContent = full ? 'До лампи' : 'На всю сторінку';
+  document.getElementById('fsBtn').classList.toggle('on', full);
+  if(!full) gooFull.innerHTML = '';
+  render();
+}
+document.getElementById('fsBtn').addEventListener('click', ()=>setFull(!full));
+
+let resizeT;
+window.addEventListener('resize', ()=>{
+  clearTimeout(resizeT);
+  resizeT = setTimeout(()=>{ if(full) render(); }, 250);
+});
+
+/* ============ ЗВУК: генеративний ембієнт ============ */
+let ctx, master, playing = false, padTimer = null, noteTimer = null;
 
 function makeReverb(seconds){
   const rate = ctx.sampleRate, len = rate * seconds;
@@ -248,7 +308,7 @@ function initAudio(){
   lp.type = 'lowpass'; lp.frequency.value = 1400; lp.Q.value = 0.6;
 
   const reverb = makeReverb(5);
-  wet = ctx.createGain(); wet.gain.value = 0.75;
+  const wet = ctx.createGain(); wet.gain.value = 0.75;
 
   lp.connect(master);
   lp.connect(reverb); reverb.connect(wet); wet.connect(master);
@@ -256,7 +316,6 @@ function initAudio(){
   initAudio.bus = lp;
 }
 
-/* один голос: дві розстроєні хвилі з довгою атакою */
 function voice(freq, dur, gain, type='sine', pan=0){
   const g = ctx.createGain();
   const p = ctx.createStereoPanner();
@@ -264,43 +323,32 @@ function voice(freq, dur, gain, type='sine', pan=0){
   g.gain.setValueAtTime(0.0001, ctx.currentTime);
   g.gain.exponentialRampToValueAtTime(gain, ctx.currentTime + dur*0.35);
   g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + dur);
-
   [-4, 4].forEach(det=>{
     const o = ctx.createOscillator();
-    o.type = type;
-    o.frequency.value = freq;
-    o.detune.value = det;
-    o.connect(g);
-    o.start();
-    o.stop(ctx.currentTime + dur + 0.1);
+    o.type = type; o.frequency.value = freq; o.detune.value = det;
+    o.connect(g); o.start(); o.stop(ctx.currentTime + dur + 0.1);
   });
   g.connect(p); p.connect(initAudio.bus);
-  return g;
 }
 
 function playPad(){
   const m = MODES[current];
-  const deg = [0, 2, 4].map(i => m.scale[(i + Math.floor(Math.random()*m.scale.length)) % m.scale.length]);
+  const deg = [0,2,4].map(i => m.scale[(i + Math.floor(Math.random()*m.scale.length)) % m.scale.length]);
   const dur = m.pace * 2.6;
-  voice(midi(m.root - 12), dur, 0.16, 'sine', 0);              // бас
+  voice(midi(m.root - 12), dur, 0.16, 'sine', 0);
   deg.forEach((d,i) => voice(midi(m.root + d + (i?12:0)), dur, 0.09, 'triangle', (i-1)*0.5));
   padTimer = setTimeout(playPad, dur * 700);
 }
-
 function playNote(){
   const m = MODES[current];
-  const oct = pick([0, 12, 12, 24]);
-  voice(midi(m.root + pick(m.scale) + oct), rnd(3.5, 7), 0.07, 'sine', rnd(-0.8, 0.8));
+  voice(midi(m.root + pick(m.scale) + pick([0,12,12,24])), rnd(3.5,7), 0.07, 'sine', rnd(-0.8,0.8));
   noteTimer = setTimeout(playNote, rnd(m.pace*0.6, m.pace*1.8) * 1000);
 }
-
 function startAudio(){
   if(playing) return;
   if(!ctx) initAudio();
-  ctx.resume();
-  playing = true;
-  playPad(); playNote();
-  updateSoundUI();
+  ctx.resume(); playing = true;
+  playPad(); playNote(); updateSoundUI();
 }
 function stopAudio(){
   playing = false;
@@ -309,13 +357,11 @@ function stopAudio(){
   updateSoundUI();
 }
 function toggleAudio(){ playing ? stopAudio() : startAudio(); }
-
 function updateSoundUI(){
   const btn = document.getElementById('sound');
   btn.classList.toggle('on', playing);
   document.getElementById('soundLabel').textContent = playing ? 'Музика грає' : 'Увімкнути музику';
 }
-
 document.getElementById('sound').addEventListener('click', toggleAudio);
 document.getElementById('vol').addEventListener('input', e=>{
   if(master) master.gain.value = e.target.value / 100 * 0.5;
@@ -323,11 +369,15 @@ document.getElementById('vol').addEventListener('input', e=>{
 
 /* ---------- клавіатура ---------- */
 document.addEventListener('keydown', e=>{
+  const k = e.key.toLowerCase();
   if(e.key === 'ArrowRight'){ setMode(current+1); e.preventDefault(); }
   if(e.key === 'ArrowLeft'){  setMode(current-1); e.preventDefault(); }
-  if(e.key === 'ArrowUp'){    speed = Math.min(speed+.25, 3);   setMode(current); e.preventDefault(); }
-  if(e.key === 'ArrowDown'){  speed = Math.max(speed-.25, .25); setMode(current); e.preventDefault(); }
-  if(e.key.toLowerCase() === 'm' || e.key === 'м'){ toggleAudio(); }
+  if(e.key === 'ArrowUp'){    speed = Math.min(speed+.25, 3);   render(); e.preventDefault(); }
+  if(e.key === 'ArrowDown'){  speed = Math.max(speed-.25, .25); render(); e.preventDefault(); }
+  if(k === 'm' || k === 'ь') toggleAudio();
+  if(k === 'f' || k === 'а') setFull(!full);
+  if(k === 'h' || k === 'р') document.body.classList.toggle('hidden-ui');
+  if(e.key === 'Escape' && full) setFull(false);
 });
 
 setMode(0);
