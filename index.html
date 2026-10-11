@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lava Lamp · Ambient</title>
+<title>Lava Lamp · 3D</title>
 <style>
   :root{
     --liquid:#1ea2f0;
@@ -11,25 +11,81 @@
     --glow:#1ea2f0;
   }
   *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
   body{
-    min-height:100vh;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    gap:30px;
-    background:radial-gradient(circle at 50% 35%, #26262c 0%, #0c0c0f 70%);
+    background:#07070a;
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
     overflow:hidden;
   }
 
-  /* ---------- лампа ---------- */
+  /* ================= 3D-СЦЕНА ================= */
+  .room{
+    position:fixed;inset:0;
+    perspective:1100px;
+    perspective-origin:50% 42%;
+    overflow:hidden;
+    transition:opacity .5s;
+  }
+  .scene{
+    position:absolute;inset:0;
+    transform-style:preserve-3d;
+    transition:transform .4s cubic-bezier(.2,.7,.3,1);
+  }
+
+  /* стіна */
+  .wall{
+    position:absolute;left:-10%;right:-10%;top:0;height:74%;
+    background:
+      radial-gradient(ellipse 60% 55% at 50% 100%,
+        color-mix(in srgb, var(--glow) 34%, transparent) 0%, transparent 70%),
+      linear-gradient(#17171c 0%, #202027 55%, #2a2a31 100%);
+    transition:background .6s;
+  }
+
+  /* стільниця */
+  .table{
+    position:absolute;left:-60%;right:-60%;top:62%;height:150%;
+    transform:rotateX(74deg);
+    transform-origin:top center;
+    background:
+      radial-gradient(ellipse 22% 26% at 50% 4%,
+        color-mix(in srgb, var(--glow) 55%, transparent) 0%, transparent 72%),
+      repeating-linear-gradient(94deg,
+        rgba(0,0,0,.14) 0 2px, transparent 2px 26px),
+      linear-gradient(#4a3324 0%, #3a2619 45%, #241710 100%);
+    box-shadow:inset 0 2px 0 rgba(255,255,255,.08);
+    transition:background .6s;
+  }
+  /* передній край стільниці */
+  .edge{
+    position:absolute;left:-10%;right:-10%;top:73.4%;height:16px;
+    background:linear-gradient(#5a4030,#2a1b12);
+    box-shadow:0 10px 30px rgba(0,0,0,.6);
+  }
+
+  /* контактна тінь під лампою */
+  .contact{
+    position:absolute;left:50%;top:72.5%;
+    width:330px;height:48px;margin-left:-165px;
+    background:radial-gradient(ellipse at center, rgba(0,0,0,.72) 0%, transparent 70%);
+    filter:blur(10px);
+  }
+
+  /* ================= ЛАМПА ================= */
+  .stand{
+    position:absolute;left:50%;top:73%;
+    transform:translate(-50%,-100%);
+    transform-style:preserve-3d;
+  }
   .lamp{
     position:relative;width:240px;
-    filter:drop-shadow(0 0 60px color-mix(in srgb, var(--glow) 45%, transparent));
-    transition:filter .5s,opacity .45s;
+    filter:drop-shadow(0 0 70px color-mix(in srgb, var(--glow) 50%, transparent));
+    transition:filter .5s;
   }
   .cap{
     width:92px;height:120px;margin:0 auto;
     clip-path:polygon(28% 0,72% 0,100% 100%,0 100%);
-    background:linear-gradient(90deg,#6d7175,#e6e9ec 28%,#fbfcfd 46%,#c3c8cd 62%,#7d8286);
+    background:linear-gradient(90deg,#4e5256,#e6e9ec 26%,#fbfcfd 44%,#aeb3b8 62%,#5d6165);
   }
   .glass{
     position:relative;width:240px;height:360px;margin:-2px auto 0;
@@ -39,27 +95,39 @@
   .glass::after{
     content:"";position:absolute;inset:0;pointer-events:none;
     background:
-      linear-gradient(100deg,rgba(255,255,255,.30) 0 14%,transparent 24%),
-      linear-gradient(260deg,rgba(255,255,255,.14) 0 10%,transparent 20%),
-      linear-gradient(0deg,rgba(0,0,0,.28),transparent 35%);
+      linear-gradient(100deg,rgba(255,255,255,.32) 0 13%,transparent 23%),
+      linear-gradient(260deg,rgba(255,255,255,.15) 0 9%,transparent 19%),
+      linear-gradient(0deg,rgba(0,0,0,.34),transparent 38%);
   }
-  .base{width:240px;margin:-2px auto 0}
+  .base{width:240px}
   .base .top{
     width:240px;height:130px;
     clip-path:polygon(0 0,100% 0,78% 100%,22% 100%);
-    background:linear-gradient(90deg,#63676b,#dfe3e7 26%,#fafbfc 45%,#b9bec3 64%,#73777b);
+    background:linear-gradient(90deg,#44484c,#dfe3e7 24%,#fafbfc 43%,#a8adb2 62%,#53575b);
   }
   .base .ring{
     width:132px;height:16px;margin:0 auto;border-radius:3px;
-    background:linear-gradient(90deg,#595d61,#d2d6da 40%,#8d9195);
+    background:linear-gradient(90deg,#3e4246,#d2d6da 40%,#6f7377);
   }
   .base .bottom{
     width:200px;height:120px;margin:0 auto;
     clip-path:polygon(28% 0,72% 0,100% 100%,0 100%);
-    background:linear-gradient(90deg,#63676b,#dfe3e7 26%,#fafbfc 45%,#b9bec3 64%,#73777b);
+    background:linear-gradient(90deg,#44484c,#dfe3e7 24%,#fafbfc 43%,#a8adb2 62%,#53575b);
   }
 
-  /* ---------- рідина (спільна для обох режимів) ---------- */
+  /* відображення у стільниці */
+  .reflection{
+    position:absolute;left:50%;top:73%;
+    transform:translate(-50%,0) scaleY(-.55);
+    transform-origin:top center;
+    opacity:.26;
+    filter:blur(7px);
+    -webkit-mask-image:linear-gradient(to top, transparent 0%, #000 65%);
+    mask-image:linear-gradient(to top, transparent 0%, #000 65%);
+    pointer-events:none;
+  }
+
+  /* ================= РІДИНА ================= */
   .goo{
     position:absolute;inset:0;
     background:var(--liquid);
@@ -82,47 +150,41 @@
     100% {transform:translate(0,var(--top)) scale(1.15)}
   }
 
-  /* ---------- повноекранний режим ---------- */
+  /* ================= FULLSCREEN ================= */
   .stage{
-    position:fixed;inset:0;z-index:0;
-    opacity:0;pointer-events:none;
-    transition:opacity .5s;
+    position:fixed;inset:0;z-index:1;
+    opacity:0;pointer-events:none;transition:opacity .5s;
   }
   .stage .goo{filter:blur(34px) contrast(32)}
   body.full .stage{opacity:1}
-  body.full .lamp{opacity:0;pointer-events:none;position:absolute}
-  body.full .hint{opacity:.35}
+  body.full .room{opacity:0;pointer-events:none}
 
-  /* ---------- панель ---------- */
-  .ui{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:22px;
-      transition:opacity .4s}
-  body.full .ui{
-    position:fixed;left:0;right:0;bottom:26px;gap:14px;
-    padding:18px 10px 6px;
+  /* ================= ПАНЕЛЬ ================= */
+  .ui{
+    position:fixed;left:0;right:0;bottom:24px;z-index:3;
+    display:flex;flex-direction:column;align-items:center;gap:14px;
+    transition:opacity .4s;
   }
-  body.full.hidden-ui .ui{opacity:0;pointer-events:none}
-
-  .row{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center}
+  body.hidden-ui .ui{opacity:0;pointer-events:none}
+  .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:center}
   .dot{
-    width:38px;height:38px;border-radius:50%;padding:0;cursor:pointer;
-    border:2px solid rgba(255,255,255,.18);
+    width:36px;height:36px;border-radius:50%;padding:0;cursor:pointer;
+    border:2px solid rgba(255,255,255,.2);
     transition:transform .2s,border-color .2s,box-shadow .2s;
   }
   .dot:hover{transform:scale(1.12)}
-  .dot.active{border-color:#fff;transform:scale(1.2);box-shadow:0 0 18px rgba(255,255,255,.45)}
-
+  .dot.active{border-color:#fff;transform:scale(1.2);box-shadow:0 0 18px rgba(255,255,255,.5)}
   .pill{
-    display:flex;align-items:center;gap:10px;
+    display:flex;align-items:center;gap:9px;
     padding:9px 16px;border-radius:22px;cursor:pointer;
     border:1px solid rgba(255,255,255,.16);
-    background:rgba(20,20,24,.45);
+    background:rgba(16,16,20,.5);
     -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
     color:#c8ccd2;font-size:13px;letter-spacing:.3px;
     transition:background .2s,color .2s,border-color .2s;
   }
   .pill:hover{background:rgba(255,255,255,.12);color:#fff}
   .pill.on{border-color:color-mix(in srgb, var(--glow) 70%, transparent);color:#fff}
-
   .bars{display:flex;gap:3px;align-items:flex-end;height:14px}
   .bars i{width:3px;height:4px;border-radius:2px;background:currentColor;opacity:.5}
   .pill.on .bars i{opacity:1;animation:eq .9s ease-in-out infinite}
@@ -130,26 +192,50 @@
   .pill.on .bars i:nth-child(3){animation-delay:.45s}
   .pill.on .bars i:nth-child(4){animation-delay:.65s}
   @keyframes eq{0%,100%{height:4px}50%{height:14px}}
-
-  input[type=range]{width:110px;accent-color:#9aa0a8}
-  .hint{color:#6f737a;font-size:13px;letter-spacing:.3px;text-align:center;transition:opacity .4s}
+  input[type=range]{width:100px;accent-color:#9aa0a8}
+  .hint{color:#6f737a;font-size:12.5px;letter-spacing:.3px;text-align:center;padding:0 12px}
   .hint b{color:#aeb3ba;font-weight:600}
+
+  @media (max-width:560px){
+    .stand{transform:translate(-50%,-100%) scale(.62)}
+    .reflection{transform:translate(-50%,0) scaleY(-.55) scaleX(.62)}
+  }
 </style>
 </head>
 <body>
 
-  <!-- повноекранна рідина -->
-  <div class="stage" id="stage"><div class="goo" id="gooFull"></div></div>
+  <!-- 3D-кімната -->
+  <div class="room" id="room">
+    <div class="scene" id="scene">
+      <div class="wall"></div>
+      <div class="table"></div>
+      <div class="edge"></div>
+      <div class="contact"></div>
 
-  <div class="lamp" id="lamp">
-    <div class="cap"></div>
-    <div class="glass" id="glass"><div class="goo" id="gooLamp"></div></div>
-    <div class="base">
-      <div class="top"></div>
-      <div class="ring"></div>
-      <div class="bottom"></div>
+      <div class="reflection" id="reflection">
+        <div class="lamp">
+          <div class="cap"></div>
+          <div class="glass"><div class="goo" id="gooRefl"></div></div>
+          <div class="base">
+            <div class="top"></div><div class="ring"></div><div class="bottom"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stand" id="stand">
+        <div class="lamp" id="lamp">
+          <div class="cap"></div>
+          <div class="glass" id="glass"><div class="goo" id="gooLamp"></div></div>
+          <div class="base">
+            <div class="top"></div><div class="ring"></div><div class="bottom"></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
+
+  <!-- повноекранна рідина -->
+  <div class="stage" id="stage"><div class="goo" id="gooFull"></div></div>
 
   <div class="ui" id="ui">
     <div class="row" id="panel"></div>
@@ -165,7 +251,6 @@
   </div>
 
 <script>
-/* ============ ПРЕСЕТИ: колір + лад + темп ============ */
 const MODES = [
   {name:'Classic Blue', liquid:'#1ea2f0', lava:'#eaf7ff', count:6, size:[60,110], speed:1.0,
    root:55, scale:[0,2,3,5,7,10], pace:5.5},
@@ -191,10 +276,12 @@ const MODES = [
 
 const GLASS_H = 360;
 const gooLamp = document.getElementById('gooLamp');
+const gooRefl = document.getElementById('gooRefl');
 const gooFull = document.getElementById('gooFull');
 const lamp  = document.getElementById('lamp');
 const glass = document.getElementById('glass');
 const stage = document.getElementById('stage');
+const scene = document.getElementById('scene');
 const panel = document.getElementById('panel');
 const root  = document.documentElement;
 
@@ -203,17 +290,14 @@ const rnd  = (a,b) => a + Math.random()*(b-a);
 const pick = a => a[Math.floor(Math.random()*a.length)];
 const midi = n => 440 * Math.pow(2, (n-69)/12);
 
-/* ---------- кнопки режимів ---------- */
 MODES.forEach((m,i)=>{
   const b = document.createElement('button');
-  b.className = 'dot';
-  b.title = m.name;
+  b.className = 'dot'; b.title = m.name;
   b.style.background = `radial-gradient(circle at 35% 30%, ${m.lava} 0 28%, ${m.liquid} 70%)`;
   b.addEventListener('click', ()=>{ setMode(i); startAudio(); });
   panel.appendChild(b);
 });
 
-/* ---------- генерація крапель ---------- */
 function buildBlobs(box, h, m, k){
   box.innerHTML = '';
   const n = Math.round(m.count * k);
@@ -235,8 +319,14 @@ function buildBlobs(box, h, m, k){
 
 function render(){
   const m = MODES[current];
-  if(full) buildBlobs(gooFull, window.innerHeight, m, 2.4);
-  else     buildBlobs(gooLamp, GLASS_H, m, 1);
+  if(full){
+    buildBlobs(gooFull, window.innerHeight, m, 2.4);
+    gooLamp.innerHTML = ''; gooRefl.innerHTML = '';
+  }else{
+    buildBlobs(gooLamp, GLASS_H, m, 1);
+    buildBlobs(gooRefl, GLASS_H, m, 1);
+    gooFull.innerHTML = '';
+  }
 }
 
 function setMode(i){
@@ -245,13 +335,12 @@ function setMode(i){
   root.style.setProperty('--liquid', m.liquid);
   root.style.setProperty('--lava',   m.lava);
   root.style.setProperty('--glow',   m.liquid);
-  lamp.style.filter = m.rainbow ? 'drop-shadow(0 0 60px rgba(255,255,255,.35))' : '';
+  lamp.style.filter = m.rainbow ? 'drop-shadow(0 0 70px rgba(255,255,255,.4))' : '';
   render();
   document.querySelectorAll('.dot').forEach((b,n)=>b.classList.toggle('active', n===current));
   rainbowLoop(m.rainbow);
 }
 
-/* ---------- Rainbow ---------- */
 let rafId = null, hue = 0;
 function rainbowLoop(on){
   cancelAnimationFrame(rafId);
@@ -266,14 +355,24 @@ function rainbowLoop(on){
   tick();
 }
 
-/* ---------- повноекранний режим ---------- */
+/* ---- паралакс: сцена трохи повертається за мишею ---- */
+let tx = 0, ty = 0;
+window.addEventListener('mousemove', e=>{
+  if(full) return;
+  tx = (e.clientX / window.innerWidth  - .5) * 2;
+  ty = (e.clientY / window.innerHeight - .5) * 2;
+  scene.style.transform = `rotateY(${tx * 5}deg) rotateX(${-ty * 2.5}deg)`;
+});
+window.addEventListener('mouseleave', ()=>{ scene.style.transform = ''; });
+
+/* ---- fullscreen ---- */
 function setFull(on){
   full = on;
   document.body.classList.toggle('full', full);
   document.body.classList.remove('hidden-ui');
   document.getElementById('fsLabel').textContent = full ? 'До лампи' : 'На всю сторінку';
   document.getElementById('fsBtn').classList.toggle('on', full);
-  if(!full) gooFull.innerHTML = '';
+  if(full) scene.style.transform = '';
   render();
 }
 document.getElementById('fsBtn').addEventListener('click', ()=>setFull(!full));
@@ -284,7 +383,7 @@ window.addEventListener('resize', ()=>{
   resizeT = setTimeout(()=>{ if(full) render(); }, 250);
 });
 
-/* ============ ЗВУК: генеративний ембієнт ============ */
+/* ================= ЗВУК ================= */
 let ctx, master, playing = false, padTimer = null, noteTimer = null;
 
 function makeReverb(seconds){
@@ -294,43 +393,33 @@ function makeReverb(seconds){
     const data = buf.getChannelData(ch);
     for(let i=0;i<len;i++) data[i] = (Math.random()*2-1) * Math.pow(1 - i/len, 2.8);
   }
-  const conv = ctx.createConvolver();
-  conv.buffer = buf;
-  return conv;
+  const conv = ctx.createConvolver(); conv.buffer = buf; return conv;
 }
-
 function initAudio(){
   ctx = new (window.AudioContext || window.webkitAudioContext)();
   master = ctx.createGain();
   master.gain.value = document.getElementById('vol').value / 100 * 0.5;
-
   const lp = ctx.createBiquadFilter();
-  lp.type = 'lowpass'; lp.frequency.value = 1400; lp.Q.value = 0.6;
-
+  lp.type='lowpass'; lp.frequency.value=1400; lp.Q.value=0.6;
   const reverb = makeReverb(5);
   const wet = ctx.createGain(); wet.gain.value = 0.75;
-
-  lp.connect(master);
-  lp.connect(reverb); reverb.connect(wet); wet.connect(master);
+  lp.connect(master); lp.connect(reverb); reverb.connect(wet); wet.connect(master);
   master.connect(ctx.destination);
   initAudio.bus = lp;
 }
-
 function voice(freq, dur, gain, type='sine', pan=0){
   const g = ctx.createGain();
-  const p = ctx.createStereoPanner();
-  p.pan.value = pan;
+  const p = ctx.createStereoPanner(); p.pan.value = pan;
   g.gain.setValueAtTime(0.0001, ctx.currentTime);
   g.gain.exponentialRampToValueAtTime(gain, ctx.currentTime + dur*0.35);
   g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + dur);
-  [-4, 4].forEach(det=>{
+  [-4,4].forEach(det=>{
     const o = ctx.createOscillator();
-    o.type = type; o.frequency.value = freq; o.detune.value = det;
+    o.type=type; o.frequency.value=freq; o.detune.value=det;
     o.connect(g); o.start(); o.stop(ctx.currentTime + dur + 0.1);
   });
   g.connect(p); p.connect(initAudio.bus);
 }
-
 function playPad(){
   const m = MODES[current];
   const deg = [0,2,4].map(i => m.scale[(i + Math.floor(Math.random()*m.scale.length)) % m.scale.length]);
@@ -347,14 +436,11 @@ function playNote(){
 function startAudio(){
   if(playing) return;
   if(!ctx) initAudio();
-  ctx.resume(); playing = true;
-  playPad(); playNote(); updateSoundUI();
+  ctx.resume(); playing = true; playPad(); playNote(); updateSoundUI();
 }
 function stopAudio(){
-  playing = false;
-  clearTimeout(padTimer); clearTimeout(noteTimer);
-  if(ctx) ctx.suspend();
-  updateSoundUI();
+  playing = false; clearTimeout(padTimer); clearTimeout(noteTimer);
+  if(ctx) ctx.suspend(); updateSoundUI();
 }
 function toggleAudio(){ playing ? stopAudio() : startAudio(); }
 function updateSoundUI(){
@@ -367,7 +453,6 @@ document.getElementById('vol').addEventListener('input', e=>{
   if(master) master.gain.value = e.target.value / 100 * 0.5;
 });
 
-/* ---------- клавіатура ---------- */
 document.addEventListener('keydown', e=>{
   const k = e.key.toLowerCase();
   if(e.key === 'ArrowRight'){ setMode(current+1); e.preventDefault(); }
