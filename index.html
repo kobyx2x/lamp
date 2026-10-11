@@ -3,19 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lava Lamp</title>
+<title>Lava Lamp · Ambient</title>
 <style>
   :root{
     --liquid:#1ea2f0;
     --lava:#eaf7ff;
     --glow:#1ea2f0;
-    --speed:1;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{
     min-height:100vh;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    gap:34px;
+    gap:30px;
     background:radial-gradient(circle at 50% 35%, #26262c 0%, #0c0c0f 70%);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
     overflow:hidden;
@@ -23,26 +22,20 @@
 
   /* ---------- лампа ---------- */
   .lamp{
-    position:relative;
-    width:240px;
+    position:relative;width:240px;
     filter:drop-shadow(0 0 60px color-mix(in srgb, var(--glow) 45%, transparent));
     transition:filter .5s;
   }
-
   .cap{
     width:92px;height:120px;margin:0 auto;
     clip-path:polygon(28% 0,72% 0,100% 100%,0 100%);
     background:linear-gradient(90deg,#6d7175,#e6e9ec 28%,#fbfcfd 46%,#c3c8cd 62%,#7d8286);
   }
-
   .glass{
-    position:relative;
-    width:240px;height:360px;margin:-2px auto 0;
+    position:relative;width:240px;height:360px;margin:-2px auto 0;
     clip-path:polygon(34% 0,66% 0,100% 100%,0 100%);
     overflow:hidden;
   }
-
-  /* шар, у якому відбувається злиття крапель */
   .goo{
     position:absolute;inset:0;
     background:var(--liquid);
@@ -50,8 +43,7 @@
     transition:background .6s;
   }
   .blob{
-    position:absolute;
-    border-radius:50%;
+    position:absolute;border-radius:50%;
     background:var(--lava);
     animation-name:rise;
     animation-timing-function:ease-in-out;
@@ -60,22 +52,18 @@
     transition:background .6s;
   }
   @keyframes rise{
-    0%   {transform:translate(0,0)            scale(1)}
+    0%   {transform:translate(0,0) scale(1)}
     35%  {transform:translate(var(--dx),-120px) scale(1.25)}
     65%  {transform:translate(calc(var(--dx) * -1),-250px) scale(.85)}
-    100% {transform:translate(0,var(--top))    scale(1.15)}
+    100% {transform:translate(0,var(--top)) scale(1.15)}
   }
-
-  /* блік на склі */
   .glass::after{
-    content:"";position:absolute;inset:0;
+    content:"";position:absolute;inset:0;pointer-events:none;
     background:
       linear-gradient(100deg,rgba(255,255,255,.30) 0 14%,transparent 24%),
       linear-gradient(260deg,rgba(255,255,255,.14) 0 10%,transparent 20%),
       linear-gradient(0deg,rgba(0,0,0,.28),transparent 35%);
-    pointer-events:none;
   }
-
   .base{width:240px;margin:-2px auto 0}
   .base .top{
     width:240px;height:130px;
@@ -83,9 +71,8 @@
     background:linear-gradient(90deg,#63676b,#dfe3e7 26%,#fafbfc 45%,#b9bec3 64%,#73777b);
   }
   .base .ring{
-    width:132px;height:16px;margin:0 auto;
+    width:132px;height:16px;margin:0 auto;border-radius:3px;
     background:linear-gradient(90deg,#595d61,#d2d6da 40%,#8d9195);
-    border-radius:3px;
   }
   .base .bottom{
     width:200px;height:120px;margin:0 auto;
@@ -94,20 +81,35 @@
   }
 
   /* ---------- панель ---------- */
-  .panel{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+  .row{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:center}
   .dot{
-    width:38px;height:38px;border-radius:50%;
+    width:38px;height:38px;border-radius:50%;padding:0;cursor:pointer;
     border:2px solid rgba(255,255,255,.18);
-    cursor:pointer;padding:0;
     transition:transform .2s,border-color .2s,box-shadow .2s;
   }
   .dot:hover{transform:scale(1.12)}
-  .dot.active{
-    border-color:#fff;
-    transform:scale(1.2);
-    box-shadow:0 0 18px rgba(255,255,255,.45);
+  .dot.active{border-color:#fff;transform:scale(1.2);box-shadow:0 0 18px rgba(255,255,255,.45)}
+
+  .sound{
+    display:flex;align-items:center;gap:10px;
+    padding:9px 16px;border-radius:22px;cursor:pointer;
+    border:1px solid rgba(255,255,255,.16);
+    background:rgba(255,255,255,.05);
+    color:#c8ccd2;font-size:13px;letter-spacing:.3px;
+    transition:background .2s,color .2s,border-color .2s;
   }
-  .hint{color:#6f737a;font-size:13px;letter-spacing:.3px}
+  .sound:hover{background:rgba(255,255,255,.1);color:#fff}
+  .sound.on{border-color:color-mix(in srgb, var(--glow) 70%, transparent);color:#fff}
+  .bars{display:flex;gap:3px;align-items:flex-end;height:14px}
+  .bars i{width:3px;height:4px;border-radius:2px;background:currentColor;opacity:.5}
+  .sound.on .bars i{opacity:1;animation:eq .9s ease-in-out infinite}
+  .sound.on .bars i:nth-child(2){animation-delay:.2s}
+  .sound.on .bars i:nth-child(3){animation-delay:.45s}
+  .sound.on .bars i:nth-child(4){animation-delay:.65s}
+  @keyframes eq{0%,100%{height:4px}50%{height:14px}}
+
+  input[type=range]{width:110px;accent-color:#9aa0a8}
+  .hint{color:#6f737a;font-size:13px;letter-spacing:.3px;text-align:center}
   .hint b{color:#aeb3ba;font-weight:600}
 </style>
 </head>
@@ -115,7 +117,7 @@
 
   <div class="lamp" id="lamp">
     <div class="cap"></div>
-    <div class="glass"><div class="goo" id="goo"></div></div>
+    <div class="glass" id="glass"><div class="goo" id="goo"></div></div>
     <div class="base">
       <div class="top"></div>
       <div class="ring"></div>
@@ -123,44 +125,67 @@
     </div>
   </div>
 
-  <div class="panel" id="panel"></div>
-  <p class="hint"><b>← →</b> режим &nbsp;·&nbsp; <b>↑ ↓</b> швидкість</p>
+  <div class="row" id="panel"></div>
+
+  <div class="row">
+    <button class="sound" id="sound">
+      <span class="bars"><i></i><i></i><i></i><i></i></span>
+      <span id="soundLabel">Увімкнути музику</span>
+    </button>
+    <input type="range" id="vol" min="0" max="100" value="55" title="Гучність">
+  </div>
+
+  <p class="hint"><b>← →</b> режим &nbsp;·&nbsp; <b>↑ ↓</b> швидкість &nbsp;·&nbsp; <b>M</b> звук</p>
 
 <script>
+/* ============ ПРЕСЕТИ ============
+   кожен режим = колір + свій музичний лад і темп        */
 const MODES = [
-  {name:'Classic Blue', liquid:'#1ea2f0', lava:'#eaf7ff', count:6, size:[60,110], speed:1.0},
-  {name:'Lava Red',     liquid:'#c0180f', lava:'#ffb02e', count:7, size:[50,100], speed:1.2},
-  {name:'Purple Haze',  liquid:'#5b1fa8', lava:'#ff6ad5', count:6, size:[60,120], speed:0.8},
-  {name:'Toxic',        liquid:'#0f3d16', lava:'#8dff3a', count:8, size:[40,85],  speed:1.5},
-  {name:'Aqua',         liquid:'#06707a', lava:'#b6fff4', count:5, size:[70,130], speed:0.7},
-  {name:'Sunset',       liquid:'#e0530b', lava:'#ffe169', count:6, size:[55,105], speed:1.1},
-  {name:'Magenta',      liquid:'#9b0f5e', lava:'#ffd0f0', count:7, size:[45,95],  speed:1.3},
-  {name:'Ice',          liquid:'#9fd6ff', lava:'#ffffff', count:5, size:[70,125], speed:0.6},
-  {name:'Amber',        liquid:'#2a1402', lava:'#ffa41b', count:6, size:[55,110], speed:0.9},
-  {name:'Rainbow',      liquid:'#2b6cff', lava:'#fff2a8', count:8, size:[45,95],  speed:1.4, rainbow:true}
+  {name:'Classic Blue', liquid:'#1ea2f0', lava:'#eaf7ff', count:6, size:[60,110], speed:1.0,
+   root:55, scale:[0,2,3,5,7,10], pace:5.5},                       // G мінор пентатоніка+
+  {name:'Lava Red',     liquid:'#c0180f', lava:'#ffb02e', count:7, size:[50,100], speed:1.2,
+   root:50, scale:[0,1,5,7,8],    pace:4.0},                       // фрігійський, напружений
+  {name:'Purple Haze',  liquid:'#5b1fa8', lava:'#ff6ad5', count:6, size:[60,120], speed:0.8,
+   root:53, scale:[0,2,4,7,9,11], pace:6.5},                       // лідійський
+  {name:'Toxic',        liquid:'#0f3d16', lava:'#8dff3a', count:8, size:[40,85],  speed:1.5,
+   root:57, scale:[0,2,3,6,7,10], pace:3.2},
+  {name:'Aqua',         liquid:'#06707a', lava:'#b6fff4', count:5, size:[70,130], speed:0.7,
+   root:48, scale:[0,2,5,7,9],    pace:7.5},
+  {name:'Sunset',       liquid:'#e0530b', lava:'#ffe169', count:6, size:[55,105], speed:1.1,
+   root:52, scale:[0,2,4,7,9],    pace:5.0},
+  {name:'Magenta',      liquid:'#9b0f5e', lava:'#ffd0f0', count:7, size:[45,95],  speed:1.3,
+   root:56, scale:[0,3,5,7,10],   pace:4.2},
+  {name:'Ice',          liquid:'#9fd6ff', lava:'#ffffff', count:5, size:[70,125], speed:0.6,
+   root:60, scale:[0,2,4,6,9,11], pace:8.5},
+  {name:'Amber',        liquid:'#2a1402', lava:'#ffa41b', count:6, size:[55,110], speed:0.9,
+   root:46, scale:[0,3,5,7,8,10], pace:6.0},
+  {name:'Rainbow',      liquid:'#2b6cff', lava:'#fff2a8', count:8, size:[45,95],  speed:1.4,
+   root:58, scale:[0,2,4,5,7,9,11], pace:3.8, rainbow:true}
 ];
 
 const GLASS_H = 360;
-const goo   = document.getElementById('goo');
-const lamp  = document.getElementById('lamp');
+const goo = document.getElementById('goo');
+const lamp = document.getElementById('lamp');
+const glass = document.getElementById('glass');
 const panel = document.getElementById('panel');
-const root  = document.documentElement;
+const root = document.documentElement;
 
-let current = 0;
-let speed   = 1;
+let current = 0, speed = 1;
+const rnd = (a,b) => a + Math.random()*(b-a);
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const midi = n => 440 * Math.pow(2, (n-69)/12);
 
-/* кнопки */
+/* ---------- кнопки режимів ---------- */
 MODES.forEach((m,i)=>{
   const b = document.createElement('button');
   b.className = 'dot';
   b.title = m.name;
   b.style.background = `radial-gradient(circle at 35% 30%, ${m.lava} 0 28%, ${m.liquid} 70%)`;
-  b.addEventListener('click', ()=>setMode(i));
+  b.addEventListener('click', ()=>{ setMode(i); startAudio(); });
   panel.appendChild(b);
 });
 
-function rnd(a,b){ return a + Math.random()*(b-a); }
-
+/* ---------- візуал ---------- */
 function setMode(i){
   current = (i + MODES.length) % MODES.length;
   const m = MODES[current];
@@ -168,11 +193,7 @@ function setMode(i){
   root.style.setProperty('--liquid', m.liquid);
   root.style.setProperty('--lava',   m.lava);
   root.style.setProperty('--glow',   m.liquid);
-
-  lamp.style.animation = m.rainbow ? 'none' : 'none';
-  lamp.style.filter = m.rainbow
-    ? 'drop-shadow(0 0 60px rgba(255,255,255,.35))'
-    : '';
+  lamp.style.filter = m.rainbow ? 'drop-shadow(0 0 60px rgba(255,255,255,.35))' : '';
 
   goo.innerHTML = '';
   for(let k=0;k<m.count;k++){
@@ -181,45 +202,136 @@ function setMode(i){
     const s = rnd(m.size[0], m.size[1]);
     d.style.width  = s + 'px';
     d.style.height = s * rnd(.85,1.05) + 'px';
-    d.style.left   = rnd(-5, 95) + '%';
-    d.style.bottom = rnd(-40, 20) + 'px';
+    d.style.left   = rnd(-5,95) + '%';
+    d.style.bottom = rnd(-40,20) + 'px';
     d.style.setProperty('--dx',  rnd(-28,28) + 'px');
     d.style.setProperty('--top', -(GLASS_H - s*0.6) + 'px');
     d.style.animationDuration = (rnd(9,20) / (m.speed*speed)) + 's';
     d.style.animationDelay    = -rnd(0,16) + 's';
     goo.appendChild(d);
   }
-
-  document.querySelectorAll('.dot')
-    .forEach((b,n)=>b.classList.toggle('active', n===current));
-
+  document.querySelectorAll('.dot').forEach((b,n)=>b.classList.toggle('active', n===current));
   rainbowLoop(m.rainbow);
 }
 
-/* режим Rainbow — повільне обертання відтінку */
 let rafId = null, hue = 0;
 function rainbowLoop(on){
   cancelAnimationFrame(rafId);
-  document.querySelector('.glass').style.filter = '';
+  glass.style.filter = '';
   if(!on) return;
-  const glass = document.querySelector('.glass');
-  const tick = ()=>{
-    hue = (hue + 0.4) % 360;
-    glass.style.filter = `hue-rotate(${hue}deg)`;
-    rafId = requestAnimationFrame(tick);
-  };
+  const tick = ()=>{ hue=(hue+0.4)%360; glass.style.filter=`hue-rotate(${hue}deg)`; rafId=requestAnimationFrame(tick); };
   tick();
 }
 
-/* клавіатура */
+/* ============ ЗВУК ============
+   генеративний ембієнт на Web Audio: пад + рідкі ноти + реверб */
+let ctx, master, wet, playing = false, padTimer = null, noteTimer = null, voices = [];
+
+function makeReverb(seconds){
+  const rate = ctx.sampleRate, len = rate * seconds;
+  const buf = ctx.createBuffer(2, len, rate);
+  for(let ch=0; ch<2; ch++){
+    const data = buf.getChannelData(ch);
+    for(let i=0;i<len;i++) data[i] = (Math.random()*2-1) * Math.pow(1 - i/len, 2.8);
+  }
+  const conv = ctx.createConvolver();
+  conv.buffer = buf;
+  return conv;
+}
+
+function initAudio(){
+  ctx = new (window.AudioContext || window.webkitAudioContext)();
+  master = ctx.createGain();
+  master.gain.value = document.getElementById('vol').value / 100 * 0.5;
+
+  const lp = ctx.createBiquadFilter();
+  lp.type = 'lowpass'; lp.frequency.value = 1400; lp.Q.value = 0.6;
+
+  const reverb = makeReverb(5);
+  wet = ctx.createGain(); wet.gain.value = 0.75;
+
+  lp.connect(master);
+  lp.connect(reverb); reverb.connect(wet); wet.connect(master);
+  master.connect(ctx.destination);
+  initAudio.bus = lp;
+}
+
+/* один голос: дві розстроєні хвилі з довгою атакою */
+function voice(freq, dur, gain, type='sine', pan=0){
+  const g = ctx.createGain();
+  const p = ctx.createStereoPanner();
+  p.pan.value = pan;
+  g.gain.setValueAtTime(0.0001, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(gain, ctx.currentTime + dur*0.35);
+  g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + dur);
+
+  [-4, 4].forEach(det=>{
+    const o = ctx.createOscillator();
+    o.type = type;
+    o.frequency.value = freq;
+    o.detune.value = det;
+    o.connect(g);
+    o.start();
+    o.stop(ctx.currentTime + dur + 0.1);
+  });
+  g.connect(p); p.connect(initAudio.bus);
+  return g;
+}
+
+function playPad(){
+  const m = MODES[current];
+  const deg = [0, 2, 4].map(i => m.scale[(i + Math.floor(Math.random()*m.scale.length)) % m.scale.length]);
+  const dur = m.pace * 2.6;
+  voice(midi(m.root - 12), dur, 0.16, 'sine', 0);              // бас
+  deg.forEach((d,i) => voice(midi(m.root + d + (i?12:0)), dur, 0.09, 'triangle', (i-1)*0.5));
+  padTimer = setTimeout(playPad, dur * 700);
+}
+
+function playNote(){
+  const m = MODES[current];
+  const oct = pick([0, 12, 12, 24]);
+  voice(midi(m.root + pick(m.scale) + oct), rnd(3.5, 7), 0.07, 'sine', rnd(-0.8, 0.8));
+  noteTimer = setTimeout(playNote, rnd(m.pace*0.6, m.pace*1.8) * 1000);
+}
+
+function startAudio(){
+  if(playing) return;
+  if(!ctx) initAudio();
+  ctx.resume();
+  playing = true;
+  playPad(); playNote();
+  updateSoundUI();
+}
+function stopAudio(){
+  playing = false;
+  clearTimeout(padTimer); clearTimeout(noteTimer);
+  if(ctx) ctx.suspend();
+  updateSoundUI();
+}
+function toggleAudio(){ playing ? stopAudio() : startAudio(); }
+
+function updateSoundUI(){
+  const btn = document.getElementById('sound');
+  btn.classList.toggle('on', playing);
+  document.getElementById('soundLabel').textContent = playing ? 'Музика грає' : 'Увімкнути музику';
+}
+
+document.getElementById('sound').addEventListener('click', toggleAudio);
+document.getElementById('vol').addEventListener('input', e=>{
+  if(master) master.gain.value = e.target.value / 100 * 0.5;
+});
+
+/* ---------- клавіатура ---------- */
 document.addEventListener('keydown', e=>{
-  if(e.key === 'ArrowRight'){ setMode(current + 1); e.preventDefault(); }
-  if(e.key === 'ArrowLeft'){  setMode(current - 1); e.preventDefault(); }
-  if(e.key === 'ArrowUp'){    speed = Math.min(speed + .25, 3);  setMode(current); e.preventDefault(); }
-  if(e.key === 'ArrowDown'){  speed = Math.max(speed - .25, .25); setMode(current); e.preventDefault(); }
+  if(e.key === 'ArrowRight'){ setMode(current+1); e.preventDefault(); }
+  if(e.key === 'ArrowLeft'){  setMode(current-1); e.preventDefault(); }
+  if(e.key === 'ArrowUp'){    speed = Math.min(speed+.25, 3);   setMode(current); e.preventDefault(); }
+  if(e.key === 'ArrowDown'){  speed = Math.max(speed-.25, .25); setMode(current); e.preventDefault(); }
+  if(e.key.toLowerCase() === 'm' || e.key === 'м'){ toggleAudio(); }
 });
 
 setMode(0);
+updateSoundUI();
 </script>
 </body>
 </html>
