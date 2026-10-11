@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lava Lamp</title>
+<style>
+  :root{
+    --liquid:#1ea2f0;
+    --lava:#eaf7ff;
+    --glow:#1ea2f0;
+    --speed:1;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:34px;
+    background:radial-gradient(circle at 50% 35%, #26262c 0%, #0c0c0f 70%);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    overflow:hidden;
+  }
+
+  /* ---------- лампа ---------- */
+  .lamp{
+    position:relative;
+    width:240px;
+    filter:drop-shadow(0 0 60px color-mix(in srgb, var(--glow) 45%, transparent));
+    transition:filter .5s;
+  }
+
+  .cap{
+    width:92px;height:120px;margin:0 auto;
+    clip-path:polygon(28% 0,72% 0,100% 100%,0 100%);
+    background:linear-gradient(90deg,#6d7175,#e6e9ec 28%,#fbfcfd 46%,#c3c8cd 62%,#7d8286);
+  }
+
+  .glass{
+    position:relative;
+    width:240px;height:360px;margin:-2px auto 0;
+    clip-path:polygon(34% 0,66% 0,100% 100%,0 100%);
+    overflow:hidden;
+  }
+
+  /* шар, у якому відбувається злиття крапель */
+  .goo{
+    position:absolute;inset:0;
+    background:var(--liquid);
+    filter:blur(14px) contrast(26);
+    transition:background .6s;
+  }
+  .blob{
+    position:absolute;
+    border-radius:50%;
+    background:var(--lava);
+    animation-name:rise;
+    animation-timing-function:ease-in-out;
+    animation-iteration-count:infinite;
+    animation-direction:alternate;
+    transition:background .6s;
+  }
+  @keyframes rise{
+    0%   {transform:translate(0,0)            scale(1)}
+    35%  {transform:translate(var(--dx),-120px) scale(1.25)}
+    65%  {transform:translate(calc(var(--dx) * -1),-250px) scale(.85)}
+    100% {transform:translate(0,var(--top))    scale(1.15)}
+  }
+
+  /* блік на склі */
+  .glass::after{
+    content:"";position:absolute;inset:0;
+    background:
+      linear-gradient(100deg,rgba(255,255,255,.30) 0 14%,transparent 24%),
+      linear-gradient(260deg,rgba(255,255,255,.14) 0 10%,transparent 20%),
+      linear-gradient(0deg,rgba(0,0,0,.28),transparent 35%);
+    pointer-events:none;
+  }
+
+  .base{width:240px;margin:-2px auto 0}
+  .base .top{
+    width:240px;height:130px;
+    clip-path:polygon(0 0,100% 0,78% 100%,22% 100%);
+    background:linear-gradient(90deg,#63676b,#dfe3e7 26%,#fafbfc 45%,#b9bec3 64%,#73777b);
+  }
+  .base .ring{
+    width:132px;height:16px;margin:0 auto;
+    background:linear-gradient(90deg,#595d61,#d2d6da 40%,#8d9195);
+    border-radius:3px;
+  }
+  .base .bottom{
+    width:200px;height:120px;margin:0 auto;
+    clip-path:polygon(28% 0,72% 0,100% 100%,0 100%);
+    background:linear-gradient(90deg,#63676b,#dfe3e7 26%,#fafbfc 45%,#b9bec3 64%,#73777b);
+  }
+
+  /* ---------- панель ---------- */
+  .panel{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+  .dot{
+    width:38px;height:38px;border-radius:50%;
+    border:2px solid rgba(255,255,255,.18);
+    cursor:pointer;padding:0;
+    transition:transform .2s,border-color .2s,box-shadow .2s;
+  }
+  .dot:hover{transform:scale(1.12)}
+  .dot.active{
+    border-color:#fff;
+    transform:scale(1.2);
+    box-shadow:0 0 18px rgba(255,255,255,.45);
+  }
+  .hint{color:#6f737a;font-size:13px;letter-spacing:.3px}
+  .hint b{color:#aeb3ba;font-weight:600}
+</style>
+</head>
+<body>
+
+  <div class="lamp" id="lamp">
+    <div class="cap"></div>
+    <div class="glass"><div class="goo" id="goo"></div></div>
+    <div class="base">
+      <div class="top"></div>
+      <div class="ring"></div>
+      <div class="bottom"></div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel"></div>
+  <p class="hint"><b>← →</b> режим &nbsp;·&nbsp; <b>↑ ↓</b> швидкість</p>
+
+<script>
+const MODES = [
+  {name:'Classic Blue', liquid:'#1ea2f0', lava:'#eaf7ff', count:6, size:[60,110], speed:1.0},
+  {name:'Lava Red',     liquid:'#c0180f', lava:'#ffb02e', count:7, size:[50,100], speed:1.2},
+  {name:'Purple Haze',  liquid:'#5b1fa8', lava:'#ff6ad5', count:6, size:[60,120], speed:0.8},
+  {name:'Toxic',        liquid:'#0f3d16', lava:'#8dff3a', count:8, size:[40,85],  speed:1.5},
+  {name:'Aqua',         liquid:'#06707a', lava:'#b6fff4', count:5, size:[70,130], speed:0.7},
+  {name:'Sunset',       liquid:'#e0530b', lava:'#ffe169', count:6, size:[55,105], speed:1.1},
+  {name:'Magenta',      liquid:'#9b0f5e', lava:'#ffd0f0', count:7, size:[45,95],  speed:1.3},
+  {name:'Ice',          liquid:'#9fd6ff', lava:'#ffffff', count:5, size:[70,125], speed:0.6},
+  {name:'Amber',        liquid:'#2a1402', lava:'#ffa41b', count:6, size:[55,110], speed:0.9},
+  {name:'Rainbow',      liquid:'#2b6cff', lava:'#fff2a8', count:8, size:[45,95],  speed:1.4, rainbow:true}
+];
+
+const GLASS_H = 360;
+const goo   = document.getElementById('goo');
+const lamp  = document.getElementById('lamp');
+const panel = document.getElementById('panel');
+const root  = document.documentElement;
+
+let current = 0;
+let speed   = 1;
+
+/* кнопки */
+MODES.forEach((m,i)=>{
+  const b = document.createElement('button');
+  b.className = 'dot';
+  b.title = m.name;
+  b.style.background = `radial-gradient(circle at 35% 30%, ${m.lava} 0 28%, ${m.liquid} 70%)`;
+  b.addEventListener('click', ()=>setMode(i));
+  panel.appendChild(b);
+});
+
+function rnd(a,b){ return a + Math.random()*(b-a); }
+
+function setMode(i){
+  current = (i + MODES.length) % MODES.length;
+  const m = MODES[current];
+
+  root.style.setProperty('--liquid', m.liquid);
+  root.style.setProperty('--lava',   m.lava);
+  root.style.setProperty('--glow',   m.liquid);
+
+  lamp.style.animation = m.rainbow ? 'none' : 'none';
+  lamp.style.filter = m.rainbow
+    ? 'drop-shadow(0 0 60px rgba(255,255,255,.35))'
+    : '';
+
+  goo.innerHTML = '';
+  for(let k=0;k<m.count;k++){
+    const d = document.createElement('div');
+    d.className = 'blob';
+    const s = rnd(m.size[0], m.size[1]);
+    d.style.width  = s + 'px';
+    d.style.height = s * rnd(.85,1.05) + 'px';
+    d.style.left   = rnd(-5, 95) + '%';
+    d.style.bottom = rnd(-40, 20) + 'px';
+    d.style.setProperty('--dx',  rnd(-28,28) + 'px');
+    d.style.setProperty('--top', -(GLASS_H - s*0.6) + 'px');
+    d.style.animationDuration = (rnd(9,20) / (m.speed*speed)) + 's';
+    d.style.animationDelay    = -rnd(0,16) + 's';
+    goo.appendChild(d);
+  }
+
+  document.querySelectorAll('.dot')
+    .forEach((b,n)=>b.classList.toggle('active', n===current));
+
+  rainbowLoop(m.rainbow);
+}
+
+/* режим Rainbow — повільне обертання відтінку */
+let rafId = null, hue = 0;
+function rainbowLoop(on){
+  cancelAnimationFrame(rafId);
+  document.querySelector('.glass').style.filter = '';
+  if(!on) return;
+  const glass = document.querySelector('.glass');
+  const tick = ()=>{
+    hue = (hue + 0.4) % 360;
+    glass.style.filter = `hue-rotate(${hue}deg)`;
+    rafId = requestAnimationFrame(tick);
+  };
+  tick();
+}
+
+/* клавіатура */
+document.addEventListener('keydown', e=>{
+  if(e.key === 'ArrowRight'){ setMode(current + 1); e.preventDefault(); }
+  if(e.key === 'ArrowLeft'){  setMode(current - 1); e.preventDefault(); }
+  if(e.key === 'ArrowUp'){    speed = Math.min(speed + .25, 3);  setMode(current); e.preventDefault(); }
+  if(e.key === 'ArrowDown'){  speed = Math.max(speed - .25, .25); setMode(current); e.preventDefault(); }
+});
+
+setMode(0);
+</script>
+</body>
+</html>
